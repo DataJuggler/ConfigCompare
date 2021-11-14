@@ -13,6 +13,7 @@ This project uses three projects / nuget packages of mine:
 https://github.com/DataJuggler/DataJuggler.Win.Controls
 
 2. DataJuggler.UltimateHelper - I uses this in almost everything
+
 https://github.com/DataJuggler/UltimateHelper
 
 3. XmlMirror5.RunTime - I have a class called FieldValuePair I used to hold the appsettings key value pairs.
