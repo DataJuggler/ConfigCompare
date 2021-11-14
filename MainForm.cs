@@ -86,14 +86,14 @@ namespace ConfigCompare
                                 if (!TextHelper.IsEqual(fieldValuePair.FieldValue.ToString(), target.FieldValue.ToString()))
                                 {
                                     // we have a difference                                    
-                                    ResultsListBox.Items.Add("App Setting " + fieldValuePair.FieldName + " has a different value in the target list.");
+                                    ResultsListBox.Items.Add("App Setting " + fieldValuePair.FieldName + " has a different value in the target file.");
                                 }
                             }
                         }
                         else
                         {
                             // show a message
-                            ResultsListBox.Items.Add("App Setting " + fieldValuePair.FieldName + " was not found in the target list.");
+                            ResultsListBox.Items.Add("App Setting " + fieldValuePair.FieldName + " was not found in the target file.");
                         }
                     }
                 }
@@ -114,6 +114,95 @@ namespace ConfigCompare
                     // show the results
                     StatusLabel.Text = "No differences found.";
                 }
+            }
+            #endregion
+            
+            #region CopiedTimer_Tick(object sender, EventArgs e)
+            /// <summary>
+            /// event is fired when Copied Timer _ Tick
+            /// </summary>
+            private void CopiedTimer_Tick(object sender, EventArgs e)
+            {
+                // hide
+                CopiedImage.Visible = false;
+
+                // only run once
+                CopiedTimer.Stop();
+            }
+            #endregion
+            
+            #region CopyButton_Click(object sender, EventArgs e)
+            /// <summary>
+            /// event is fired when the 'CopyButton' is clicked.
+            /// </summary>
+            private void CopyButton_Click(object sender, EventArgs e)
+            {
+                // Create a new instance of a 'StringBuilder' object.
+                StringBuilder sb = new StringBuilder();
+
+                foreach (object item in ResultsListBox.Items)
+                {
+                    sb.Append(item.ToString());
+                    sb.Append(Environment.NewLine);
+                }
+
+                // Get the results
+                string results = sb.ToString().Trim();
+
+                // show
+                CopiedImage.Visible = true;
+
+                // refresh
+                Refresh();
+                Application.DoEvents();
+
+                // Set the text
+                Clipboard.SetText(results);
+
+                // Start the timer
+                CopiedTimer.Start();
+            }
+            #endregion
+            
+            #region SwapButton_Click(object sender, EventArgs e)
+            /// <summary>
+            /// event is fired when the 'SwapButton' is clicked.
+            /// </summary>
+            private void SwapButton_Click(object sender, EventArgs e)
+            {
+                // get the value
+                string temp = SourceControl.Text;
+
+                // Set the new Source
+                SourceControl.Text = TargetControl.Text;
+
+                // Now set the target
+                TargetControl.Text = temp;
+
+                // Change the status label.
+                StatusLabel.Text = "Source and Target config files were swapped.";
+            }
+            #endregion
+            
+            #region SwapButton_MouseEnter(object sender, EventArgs e)
+            /// <summary>
+            /// event is fired when Swap Button _ Mouse Enter
+            /// </summary>
+            private void SwapButton_MouseEnter(object sender, EventArgs e)
+            {
+                // Change the cursor to a hand
+                Cursor = Cursors.Hand;
+            }
+            #endregion
+            
+            #region SwapButton_MouseLeave(object sender, EventArgs e)
+            /// <summary>
+            /// event is fired when Swap Button _ Mouse Leave
+            /// </summary>
+            private void SwapButton_MouseLeave(object sender, EventArgs e)
+            {
+                // Change the cursor back to the default pointer
+                Cursor = Cursors.Default;
             }
             #endregion
             
@@ -230,6 +319,30 @@ namespace ConfigCompare
 
         #region Properties
 
+            #region CreateParams
+            /// <summary>
+            /// This property here is what did the trick to reduce the flickering.
+            /// I also needed to make all of the controls Double Buffered, but
+            /// this was the final touch. It is a little slow when you switch tabs
+            /// but that is because the repainting is finishing before control is
+            /// returned.
+            /// </summary>
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    // initial value
+                    CreateParams cp = base.CreateParams;
+
+                    // Apparently this interrupts Paint to finish before showing
+                    cp.ExStyle |= 0x02000000;
+
+                    // return value
+                    return cp;
+                }
+            }
+            #endregion
+
             #region SourceValues
             /// <summary>
             /// This property gets or sets the value for 'SourceValues'.
@@ -250,9 +363,10 @@ namespace ConfigCompare
                 get { return targetValues; }
                 set { targetValues = value; }
             }
-            #endregion
-            
         #endregion
+
+        #endregion
+
     }
     #endregion
 
